@@ -126,15 +126,17 @@ app.MapGet("/dump", async (IKeyValueStore store, CancellationToken ct) =>
 
 // POST /replicate
 // Body: ReplicationCommand as JSON
-app.MapPost("/replicate", async (
-    ReplicationCommand command,
-    IKeyValueStore store,
-    CancellationToken ct) =>
+if (nodeRole == NodeRole.Follower)
 {
-    // Apply replicated write to local store
-    await store.SetAsync(command.Key, command.Value, ct);
-    return Results.Ok();
-});
+    app.MapPost("/replicate", async (
+        ReplicationCommand command,
+        IKeyValueStore store,
+        CancellationToken ct) =>
+    {
+        await store.SetAsync(command.Key, command.Value, ct);
+        return Results.Ok();
+    });
+}
 
 app.Run();
 
