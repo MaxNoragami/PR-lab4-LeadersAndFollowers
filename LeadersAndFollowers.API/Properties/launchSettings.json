@@ -7,7 +7,13 @@
       "launchBrowser": true,
       "applicationUrl": "http://localhost:5086",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "NODE_ROLE": "Leader",
+        "WRITE_QUORUM": "3",
+        "FOLLOWERS": "http://localhost:6001;http://localhost:6002;http://localhost:6003;http://localhost:6004;http://localhost:6005",
+        "MIN_DELAY_MS": "0",
+        "MAX_DELAY_MS": "1000",
+        "FOLLOWER_TIMEOUT_MS": "2000"
       }
     },
     "https": {
@@ -16,7 +22,13 @@
       "launchBrowser": true,
       "applicationUrl": "https://localhost:7125;http://localhost:5086",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "NODE_ROLE": "Leader",
+        "WRITE_QUORUM": "3",
+        "FOLLOWERS": "http://localhost:6001;http://localhost:6002;http://localhost:6003;http://localhost:6004;http://localhost:6005",
+        "MIN_DELAY_MS": "0",
+        "MAX_DELAY_MS": "1000",
+        "FOLLOWER_TIMEOUT_MS": "2000"
       }
     }
   }
