@@ -5,15 +5,16 @@ namespace LeadersAndFollowers.Services;
 public class ReplicationClient
 {
     private readonly HttpClient _httpClient;
-    private readonly int _minDelayMs;
-    private readonly int _maxDelayMs;
     private readonly Random _random = new();
+
+    public int MinDelayMs { get; set; }
+    public int MaxDelayMs { get; set; }
 
     public ReplicationClient(HttpClient httpClient, int minDelayMs, int maxDelayMs)
     {
         _httpClient = httpClient;
-        _minDelayMs = minDelayMs;
-        _maxDelayMs = maxDelayMs;
+        MinDelayMs = minDelayMs;
+        MaxDelayMs = maxDelayMs;
     }
 
     public async Task<bool> SendReplicationAsync(string followerUrl, ReplicationCommand command)
@@ -21,9 +22,9 @@ public class ReplicationClient
         try
         {
             // Simulate network lag
-            if (_maxDelayMs > 0)
+            if (MaxDelayMs > 0)
             {
-                var delay = _random.Next(_minDelayMs, _maxDelayMs + 1);
+                var delay = _random.Next(MinDelayMs, MaxDelayMs + 1);
                 if (delay > 0)
                     await Task.Delay(delay);
             }

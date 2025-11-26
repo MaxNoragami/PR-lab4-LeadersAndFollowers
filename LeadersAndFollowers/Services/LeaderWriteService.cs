@@ -7,7 +7,8 @@ public class LeaderWriteService
     private readonly KeyValueStore _store;
     private readonly ReplicationClient _replicationClient;
     private readonly List<string> _followers;
-    private readonly int _writeQuorum;
+
+    public int WriteQuorum { get; set; }
 
     public LeaderWriteService(
         KeyValueStore store,
@@ -18,7 +19,7 @@ public class LeaderWriteService
         _store = store;
         _replicationClient = replicationClient;
         _followers = followers;
-        _writeQuorum = writeQuorum;
+        WriteQuorum = writeQuorum;
     }
 
     public async Task<WriteResult> WriteAsync(string key, string value)
@@ -28,9 +29,9 @@ public class LeaderWriteService
         _store.Set(key, value, version);
 
         // If no quorum needed or no followers, succeed immediately
-        if (_writeQuorum == 0 || _followers.Count == 0)
+        if (WriteQuorum == 0 || _followers.Count == 0)
         {
-            return new WriteResult(true, _writeQuorum, 0);
+            return new WriteResult(true, WriteQuorum, 0);
         }
 
         var command = new ReplicationCommand(key, value, version);
@@ -43,7 +44,7 @@ public class LeaderWriteService
         var successCount = 0;
 
         // Wait until we hit quorum or run out of tasks
-        while (replicationTasks.Count > 0 && successCount < _writeQuorum)
+        while (replicationTasks.Count > 0 && successCount < WriteQuorum)
         {
             var completed = await Task.WhenAny(replicationTasks);
             replicationTasks.Remove(completed);
@@ -55,7 +56,7 @@ public class LeaderWriteService
             }
         }
 
-        var isSuccess = successCount >= _writeQuorum;
-        return new WriteResult(isSuccess, _writeQuorum, successCount);
+        var isSuccess = successCount >= WriteQuorum;
+        return new WriteResult(isSuccess, WriteQuorum, successCount);
     }
 }

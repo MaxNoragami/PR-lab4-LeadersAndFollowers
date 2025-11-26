@@ -25,6 +25,7 @@ if (nodeRole == NodeRole.Leader)
     var httpClient = new HttpClient();
     var replicationClient = new ReplicationClient(httpClient, minDelayMs, maxDelayMs);
     var leaderService = new LeaderWriteService(store, replicationClient, followers, writeQuorum);
+    builder.Services.AddSingleton(replicationClient);
     builder.Services.AddSingleton(leaderService);
 }
 
@@ -44,6 +45,43 @@ if (nodeRole == NodeRole.Leader)
             success = result.IsSuccess,
             quorum = result.RequiredQuorum,
             acks = result.SuccessfulFollowers
+        });
+    });
+
+    app.MapPost("/config", (ConfigUpdate update, LeaderWriteService leaderService, ReplicationClient replicationClient) =>
+    {
+        if (update.WriteQuorum.HasValue)
+        {
+            if (update.WriteQuorum < 1)
+                return Results.BadRequest(new { error = "write_quorum must be >= 1" });
+            if (update.WriteQuorum > followers.Count)
+                return Results.BadRequest(new { error = $"write_quorum must be <= {followers.Count} (available followers)" });
+            leaderService.WriteQuorum = update.WriteQuorum.Value;
+        }
+
+        if (update.MinDelayMs.HasValue)
+        {
+            if (update.MinDelayMs < 0)
+                 return Results.BadRequest(new { error = "min_delay_ms must be >= 0" });
+            replicationClient.MinDelayMs = update.MinDelayMs.Value;
+        }
+
+        if (update.MaxDelayMs.HasValue)
+        {
+            if (update.MaxDelayMs < 0)
+                return Results.BadRequest(new { error = "max_delay_ms must be >= 0" });
+            replicationClient.MaxDelayMs = update.MaxDelayMs.Value;
+        }
+
+        return Results.Ok(new
+        {
+            status = "ok",
+            config = new
+            {
+                write_quorum = leaderService.WriteQuorum,
+                min_delay_ms = replicationClient.MinDelayMs,
+                max_delay_ms = replicationClient.MaxDelayMs
+            }
         });
     });
 }
@@ -72,5 +110,7 @@ if (nodeRole == NodeRole.Follower)
 }
 
 app.Run();
+
+record ConfigUpdate(int? WriteQuorum, int? MinDelayMs, int? MaxDelayMs);
 
 
