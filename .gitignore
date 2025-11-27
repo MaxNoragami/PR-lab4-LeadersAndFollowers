@@ -408,3 +408,5 @@ FodyWeavers.xsd
 
 **/.DS_Store
 Thumbs.db
+
+**/results/q*/

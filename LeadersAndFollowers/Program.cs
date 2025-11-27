@@ -11,13 +11,15 @@ var writeQuorum = int.TryParse(builder.Configuration["WRITE_QUORUM"], out var wq
 var minDelayMs = int.TryParse(builder.Configuration["MIN_DELAY_MS"], out var minDelay) ? minDelay : 0;
 var maxDelayMs = int.TryParse(builder.Configuration["MAX_DELAY_MS"], out var maxDelay) ? maxDelay : 1000;
 
+var useVersioning = builder.Configuration["USE_VERSIONING"]?.ToLower() != "false";
+
 var followersEnv = builder.Configuration["FOLLOWERS"] ?? string.Empty;
 var followers = followersEnv
     .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
     .ToList();
 
 // Register services
-var store = new KeyValueStore();
+var store = new KeyValueStore { UseVersioning = useVersioning };
 builder.Services.AddSingleton(store);
 
 if (nodeRole == NodeRole.Leader)
@@ -97,6 +99,12 @@ app.MapGet("/get/{key}", (string key, KeyValueStore store) =>
 app.MapGet("/dump", (KeyValueStore store) =>
 {
     return Results.Json(store.GetAll());
+});
+
+// Dump all versions (for consistency analysis)
+app.MapGet("/dump-versions", (KeyValueStore store) =>
+{
+    return Results.Json(store.GetAllVersions());
 });
 
 // Replication endpoint (follower only)

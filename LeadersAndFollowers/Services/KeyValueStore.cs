@@ -5,13 +5,21 @@ namespace LeadersAndFollowers.Services;
 public class KeyValueStore
 {
     private readonly ConcurrentDictionary<string, (string Value, long Version)> _store = new();
-    private long _versionCounter = 0;
+    
+    public bool UseVersioning { get; set; } = true;
 
     public void Set(string key, string value, long version)
     {
-        _store.AddOrUpdate(key, 
-            _ => (value, version),
-            (_, current) => version > current.Version ? (value, version) : current);
+        if (UseVersioning)
+        {
+            _store.AddOrUpdate(key, 
+                _ => (value, version),
+                (_, current) => version > current.Version ? (value, version) : current);
+        }
+        else
+        {
+            _store[key] = (value, version);
+        }
     }
 
     public string? Get(string key)
@@ -24,8 +32,13 @@ public class KeyValueStore
         return _store.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Value);
     }
 
+    public Dictionary<string, long> GetAllVersions()
+    {
+        return _store.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Version);
+    }
+
     public long IncrementVersion()
     {
-        return Interlocked.Increment(ref _versionCounter);
+        return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
     }
 }
