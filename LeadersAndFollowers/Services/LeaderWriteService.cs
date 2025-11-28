@@ -31,7 +31,7 @@ public class LeaderWriteService
         // If no quorum needed or no followers, succeed immediately
         if (WriteQuorum == 0 || _followers.Count == 0)
         {
-            return new WriteResult(true, WriteQuorum, 0);
+            return new WriteResult(Success: true, Quorum: WriteQuorum, Acks: 0);
         }
 
         var command = new ReplicationCommand(key, value, version);
@@ -57,6 +57,6 @@ public class LeaderWriteService
         }
 
         var isSuccess = successCount >= WriteQuorum;
-        return new WriteResult(isSuccess, WriteQuorum, successCount);
+        return new WriteResult(Success: isSuccess, Quorum: WriteQuorum, Acks: successCount);
     }
 }

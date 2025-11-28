@@ -8,4 +8,4 @@ public enum NodeRole
 
 public record ReplicationCommand(string Key, string Value, long Version);
 
-public record WriteResult(bool IsSuccess, int RequiredQuorum, int SuccessfulFollowers);
+public record WriteResult(bool Success, int Quorum, int Acks);

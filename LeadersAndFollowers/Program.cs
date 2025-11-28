@@ -42,12 +42,7 @@ if (nodeRole == NodeRole.Leader)
     app.MapPost("/set", async (string key, string value, LeaderWriteService leaderService) =>
     {
         var result = await leaderService.WriteAsync(key, value);
-        return Results.Json(new
-        {
-            success = result.IsSuccess,
-            quorum = result.RequiredQuorum,
-            acks = result.SuccessfulFollowers
-        });
+        return Results.Json(result);
     });
 
     app.MapPost("/config", (ConfigUpdate update, LeaderWriteService leaderService, ReplicationClient replicationClient) =>
