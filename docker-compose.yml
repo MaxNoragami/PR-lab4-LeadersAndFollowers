@@ -6,11 +6,11 @@ services:
     container_name: leader
     environment:
       ASPNETCORE_ENVIRONMENT: "Leader"
-      WRITE_QUORUM: "3"
-      MIN_DELAY_MS: "0"
-      MAX_DELAY_MS: "1000"
+      WRITE_QUORUM: "${WRITE_QUORUM:-3}"
+      MIN_DELAY_MS: "${MIN_DELAY_MS:-0}"
+      MAX_DELAY_MS: "${MAX_DELAY_MS:-1000}"
       FOLLOWERS: "http://f1:8080;http://f2:8080;http://f3:8080;http://f4:8080;http://f5:8080"
-      USE_VERSIONING: &use_versioning "false"
+      USE_VERSIONING: &use_versioning "${USE_VERSIONING:-true}"
       ASPNETCORE_URLS: "http://+:8080"
     ports:
       - "8080:8080"

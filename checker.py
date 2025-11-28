@@ -22,8 +22,6 @@ NUM_KEYS = 10
 NUM_WRITES_PER_KEY = 10
 CONCURRENT_WRITES = 10 
 QUORUM_VALUES = [1, 2, 3, 4, 5]
-MIN_DELAY_MS = 0
-MAX_DELAY_MS = 1000
 
 
 @dataclass
@@ -42,7 +40,7 @@ def set_quorum(quorum: int) -> bool:
     try:
         response = requests.post(
             f"{LEADER_URL}/config",
-            json={"writeQuorum": quorum, "minDelayMs": MIN_DELAY_MS, "maxDelayMs": MAX_DELAY_MS},
+            json={"writeQuorum": quorum},
             timeout=5
         )
         return response.status_code == 200
