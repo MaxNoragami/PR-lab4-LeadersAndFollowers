@@ -5,13 +5,12 @@ services:
       dockerfile: Dockerfile
     container_name: leader
     environment:
-      ASPNETCORE_ENVIRONMENT: "Production"
-      NODE_ROLE: "Leader"
+      ASPNETCORE_ENVIRONMENT: "Leader"
       WRITE_QUORUM: "3"
-      FOLLOWERS: "http://f1:8080;http://f2:8080;http://f3:8080;http://f4:8080;http://f5:8080"
       MIN_DELAY_MS: "0"
       MAX_DELAY_MS: "1000"
-      USE_VERSIONING: "false"
+      FOLLOWERS: "http://f1:8080;http://f2:8080;http://f3:8080;http://f4:8080;http://f5:8080"
+      USE_VERSIONING: &use_versioning "false"
       ASPNETCORE_URLS: "http://+:8080"
     ports:
       - "8080:8080"
@@ -30,9 +29,8 @@ services:
       dockerfile: Dockerfile
     container_name: f1
     environment:
-      ASPNETCORE_ENVIRONMENT: "Production"
-      NODE_ROLE: "Follower"
-      USE_VERSIONING: "false"
+      ASPNETCORE_ENVIRONMENT: "Follower"
+      USE_VERSIONING: *use_versioning
       ASPNETCORE_URLS: "http://+:8080"
     ports:
       - "8081:8080"

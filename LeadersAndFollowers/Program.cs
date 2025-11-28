@@ -3,38 +3,27 @@ using LeadersAndFollowers.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Read configuration from environment variables
-var nodeRoleString = builder.Configuration["NODE_ROLE"] ?? "Leader";
-var nodeRole = Enum.TryParse<NodeRole>(nodeRoleString, true, out var role) ? role : NodeRole.Leader;
 
-var writeQuorum = int.TryParse(builder.Configuration["WRITE_QUORUM"], out var wq) ? wq : 1;
-var minDelayMs = int.TryParse(builder.Configuration["MIN_DELAY_MS"], out var minDelay) ? minDelay : 0;
-var maxDelayMs = int.TryParse(builder.Configuration["MAX_DELAY_MS"], out var maxDelay) ? maxDelay : 1000;
+var config = AppConfig.FromConfiguration(builder.Configuration);
 
-var useVersioning = builder.Configuration["USE_VERSIONING"]?.ToLower() != "false";
-
-var followersEnv = builder.Configuration["FOLLOWERS"] ?? string.Empty;
-var followers = followersEnv
-    .Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
-    .ToList();
-
-// Register services
-var store = new KeyValueStore(useVersioning);
+var store = new KeyValueStore(config.UseVersioning);
 builder.Services.AddSingleton(store);
 
-if (nodeRole == NodeRole.Leader)
+if (config.NodeRole == NodeRole.Leader)
 {
     var httpClient = new HttpClient();
-    var replicationClient = new ReplicationClient(httpClient, minDelayMs, maxDelayMs);
-    var leaderService = new LeaderWriteService(store, replicationClient, followers, writeQuorum);
+    var replicationClient = new ReplicationClient(httpClient, config.MinDelayMs, config.MaxDelayMs);
+    var leaderService = new LeaderWriteService(store, replicationClient, config.Followers, config.WriteQuorum);
     builder.Services.AddSingleton(replicationClient);
     builder.Services.AddSingleton(leaderService);
 }
 
+
 var app = builder.Build();
 
+
 app.MapGet("/health", () 
-    => Results.Ok(new { status = "ok", role = nodeRole.ToString() }));
+    => Results.Ok(new { status = "ok", role = config.NodeRole.ToString() }));
 
 app.MapGet("/get/{key}", (string key, KeyValueStore store) =>
 {
@@ -48,7 +37,7 @@ app.MapGet("/dump", (KeyValueStore store) =>
 app.MapGet("/dump-versions", (KeyValueStore store) =>
     Results.Json(store.GetAllVersions()));
 
-if (nodeRole == NodeRole.Leader)
+if (config.NodeRole == NodeRole.Leader)
 {
     app.MapPost("/set", async (string key, string value, LeaderWriteService leaderService) =>
     {
@@ -82,12 +71,12 @@ if (nodeRole == NodeRole.Leader)
     });
 }
 
-if (nodeRole == NodeRole.Follower)
+if (config.NodeRole == NodeRole.Follower)
     app.MapPost("/replicate", (ReplicationCommand command, KeyValueStore store) =>
     {
         store.Set(command.Key, command.Value, command.Version);
         return Results.Ok();
     });
 
-app.Run();
 
+app.Run();
