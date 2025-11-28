@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="LeadersAndFollowers.IntegrationTests/LeadersAndFollowers.IntegrationTests.csproj" />
+  <Project Path="LeadersAndFollowers/LeadersAndFollowers.csproj" />
+</Solution>

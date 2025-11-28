@@ -7,18 +7,17 @@ EXPOSE 8080
 FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
-COPY LeadersAndFollowers.API/LeadersAndFollowers.API.csproj LeadersAndFollowers.API/
-COPY LeadersAndFollowers.Core/LeadersAndFollowers.Core.csproj LeadersAndFollowers.Core/
+COPY LeadersAndFollowers/LeadersAndFollowers.csproj LeadersAndFollowers/
 
-RUN dotnet restore LeadersAndFollowers.API/LeadersAndFollowers.API.csproj
+RUN dotnet restore LeadersAndFollowers/LeadersAndFollowers.csproj
 
 COPY . .
 
-RUN dotnet publish LeadersAndFollowers.API/LeadersAndFollowers.API.csproj -c Release -o /app/publish /p:UseAppHost=false
+RUN dotnet publish LeadersAndFollowers/LeadersAndFollowers.csproj -c Release -o /app/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
 
 COPY --from=build /app/publish .
 
-ENTRYPOINT ["dotnet", "LeadersAndFollowers.API.dll"]
+ENTRYPOINT ["dotnet", "LeadersAndFollowers.dll"]
