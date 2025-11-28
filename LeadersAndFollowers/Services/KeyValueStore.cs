@@ -5,6 +5,7 @@ namespace LeadersAndFollowers.Services;
 public class KeyValueStore
 {
     private readonly ConcurrentDictionary<string, (string Value, long Version)> _store = new();
+    private long _versionCounter = 0;
 
     public void Set(string key, string value, long version)
     {
@@ -25,6 +26,6 @@ public class KeyValueStore
 
     public long IncrementVersion()
     {
-        return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+        return Interlocked.Increment(ref _versionCounter);
     }
 }

@@ -28,7 +28,7 @@ public class ReplicationTests
         
         // Assert: All writes should succeed (quorum reached)
         var successCount = responses.Count(r => r.IsSuccessStatusCode);
-        Assert.True(successCount >= 8, $"Expected at least 8 successful writes, got {successCount}");
+        Assert.True(successCount == 10, $"Expected 10 successful writes, got {successCount}");
         
         // Give replication time to complete
         await Task.Delay(2000);
