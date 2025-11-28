@@ -2,26 +2,35 @@ using LeadersAndFollowers.Models;
 
 namespace LeadersAndFollowers.Services;
 
-public class ReplicationClient
+public class ReplicationClient(
+    HttpClient httpClient, 
+    int minDelayMs, 
+    int maxDelayMs)
 {
-    private readonly HttpClient _httpClient;
+    private readonly HttpClient _httpClient = httpClient;
     private readonly Random _random = new();
 
-    public int MinDelayMs { get; set; }
-    public int MaxDelayMs { get; set; }
+    public int MinDelayMs { 
+        get; 
+        set => 
+            field = (value < 0) ?
+                throw new ArgumentException("min_delay_ms must be >= 0") :
+            value;
+    } = minDelayMs;
+    
+    public int MaxDelayMs { 
+        get; 
+        set => 
+            field = (value < 0) ?
+                throw new ArgumentException("max_delay_ms must be >= 0") :
+            value;
+    } = maxDelayMs;
 
-    public ReplicationClient(HttpClient httpClient, int minDelayMs, int maxDelayMs)
-    {
-        _httpClient = httpClient;
-        MinDelayMs = minDelayMs;
-        MaxDelayMs = maxDelayMs;
-    }
 
     public async Task<bool> SendReplicationAsync(string followerUrl, ReplicationCommand command)
     {
         try
         {
-            // Simulate network lag
             if (MaxDelayMs > 0)
             {
                 var delay = _random.Next(MinDelayMs, MaxDelayMs + 1);

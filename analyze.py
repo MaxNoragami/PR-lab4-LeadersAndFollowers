@@ -42,7 +42,7 @@ def set_quorum(quorum: int) -> bool:
     try:
         response = requests.post(
             f"{LEADER_URL}/config",
-            json={"WriteQuorum": quorum, "MinDelayMs": MIN_DELAY_MS, "MaxDelayMs": MAX_DELAY_MS},
+            json={"writeQuorum": quorum, "minDelayMs": MIN_DELAY_MS, "maxDelayMs": MAX_DELAY_MS},
             timeout=5
         )
         return response.status_code == 200
